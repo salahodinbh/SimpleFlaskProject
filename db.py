@@ -11,3 +11,4 @@ sql_query = """ CREATE TABLE invoice (
     invoice_client_id integer NOT NULL
 )"""
 cursor.execute(sql_query)
+conn.close()
