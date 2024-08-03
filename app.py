@@ -36,7 +36,7 @@ def invoices():
 
 
 @app.route("/invoices/<int:id>", methods=["GET", "DELETE"])
-def single_invoice_rd_operations():
+def single_invoice_rd_operations(id):
     conn, cursor = db_connection()
     invoice = None
     if request.method == "GET":
@@ -46,7 +46,7 @@ def single_invoice_rd_operations():
             invoice = r
         if invoice is None:
             return jsonify({'error': 'Resource not found'}), 404
-        return invoice
+        return jsonify(invoice), 200
 
     if request.method == "DELETE":
         cursor.execute("DELETE FROM invoice WHERE id=?", (id,))
@@ -56,6 +56,21 @@ def single_invoice_rd_operations():
             return jsonify({'message': 'Operation was successful'}), 200
         else:
             return jsonify({'message': 'Operation was successful but no invoice to be deleted was found'}), 200
+
+
+@app.route("/invoices/<int:id>", methods=["PUT"])
+def single_invoice_u_operations(id):
+    conn, cursor = db_connection()
+
+    update_cols = [f"{col} = ?" for col in request.form.keys()]
+    set_clause = ", ".join(update_cols)
+    cursor.execute(f"UPDATE invoice SET {set_clause} WHERE id=?", list(request.form.values()) + [id])
+    conn.commit()
+
+    if cursor.rowcount > 0:
+        return jsonify({'message': 'Operation was successful'}), 200
+    else:
+        return jsonify({'message': 'Operation was successful but no invoice to be deleted was found'}), 200
 
 
 def invoices_get_all(conn):
